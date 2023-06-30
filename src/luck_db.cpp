@@ -3,13 +3,21 @@
 #include<stdio.h>
 #include<string.h>
 #include<iostream>
+#include "../include/bpt.h"
+// #include"predefined.h";
 
 using namespace std;
+using namespace bpt;
 
 const char * nextLineHeader = " > ";
 const char * exitMessage = "不响丸辣，退出-- quit";
-const char * ErrorMessage = "错误的操作---";
+const char * ErrorMessage = "错误的操作 -_- error";
 const char *dbFileName = "./data/db.bin";
+const char *nextLineHeader ="> ";
+
+clock_t startTime, finishTime;
+
+bplus_tree * luck_db_ptr;
 
 void printHelpMess();
 void selectCommand();
@@ -18,6 +26,10 @@ void printHelp();
 
 void intiDataBase(){
 	cout << " create new database" << endl;
+
+	printHelpMess();
+
+
 }
 
 void printHelpMess(){
@@ -57,16 +69,65 @@ void selectCommand(){
 		}else if(strcmp(userCommand, ".reset")){
 			//重置数据库，先判断一下是否有这个数据库，有的话就删除并重建，没有的话就提示一句 ，并新建一个
 			if(remove(dbFileName) != 0){	//将删除./data/db.bin目录下所有的文件,成功返回0
-				cout << "你不能删除这个文件" << endl;
+				cout << "你不能删除这个文件" << nextLineHeader;
 			}else{
 				cout << "删除成功" << endl;
 			}
 			//创建一个新数据库
 			intiDataBase();
-		}else if(strncmp(userCommand, "insert", 6) == 0){
+		}else if(strncmp(userCommand, "insert", 6) == 0){	//确定要执行插入操作
 			//插入记录
+			int *insertKey = new int;
+			value_t *insertData = new value_t;
+
+			//使用sccanf 识别sql 
+			int okNum = sscanf(userCommand, "insert db %d %s %d %s", insertKey,
+						insertData->name, (&insertData->age), insertData->email);
+
+			//insertKey 自动生成，因此只用判断用户输入的字符串即可.用户需要输入三个信息，小于三个不行	
+			if(okNum < 3){
+				cout << ErrorMessage << nextLineHeader;
+			}else{
+
+				startTime = clock();
+
+				int return_code = insertRecord(luck_db_ptr, insertKey, insertData);
+
+				finishTime = clock();
+
+				if(return_code == 0){ 	//成功插入
+					cout << "executed insert index 成功插入数据" << 
+					*insertKey << "use time :" << durationTime(&finishTime, &startTime) << nextLineHeader;
+				}else if(return_code == 1){
+					cout << "failed : 存放位置已经有数据了" << *insertKey << nextLineHeader;
+				}else{
+					cout << "error\n" << nextLineHeader;
+				}
+			}
+		
 		}else if(strncmp(userCommand, "delete", 6) == 0){
 			//删除记录
+			int *deleteKey = new int;
+
+			int okNum = sscanf(userCommand, "delete from db where id = %d", deleteKey);
+
+			if(okNum < 1){
+				cout << ErrorMessage << nextLineHeader;
+			}else{
+				startTime = clock();
+				int return_code = deleteRecord(luck_db_ptr, deleteKey);
+				finishTime = clock();
+
+				if(return_code != 0){
+					cout << "index" << *deleteKey << "该数据不存在， time" << 
+					durationTime(&finishTime, &startTime) << nextLineHeader;
+				}else{
+					printTable(deleteKey, );
+				}
+
+			}
+
+
 		}else if(strncmp(userCommand, "usdate", 6) == 0){
 			//更新数据
 		}else if(strncmp(userCommand, "select", 6) == 0){
@@ -82,5 +143,42 @@ void selectCommand(){
 
 
 void printHelp(){
-	cout << "help? noway" << endl;
+	cout << "want help? okay!" << endl;
+}
+
+//自定义方法，将自动生成的索引 index，用户输入的数据，储存到 b+tree 数据结构中去.返回值是
+int insertRecord(bplus_tree *treePtr, int *index, value_t *values){
+	bpt :: key_t key;
+	//把数字传给索引key
+	intToKeyT(&key, index);
+	//insrt 函数，想一个容器中插入元素，容器.insert(位置, 数据);
+	return (*treePtr).insert(key, *values);
+}
+
+int deleteRecord(bplus_tree *treePtr, int *index){
+	bpt::key_t key;
+	intToKeyT(&key, index);
+	return (*treePtr).remove(key);
+}
+
+void intToKeyT(bpt::key_t * a, int *b){
+	char key[16] = {0};
+	sprintf(key, "%d", *b);	//将格式化的数据写入字符串
+	*a = key;
+}
+
+double durationTime(clock_t *startTime, clock_t *finishTime){
+	return (double)(*startTime - *finishTime) / CLOCKS_PER_SEC;	//通常将clock计算得到的数字除以CLOCKS_PER_SEC得到具体时间
+}
+
+void printTable(int *index, value_t *value){
+
+	
+}
+
+
+
+
+int main(int argc, char *argv[]){
+	intiDataBase();
 }
