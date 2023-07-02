@@ -4,6 +4,7 @@
 #include<string.h>
 #include<iostream>
 #include "../include/bpt.h"
+#include "../include/TextTable.h"
 // #include"predefined.h";
 
 using namespace std;
@@ -118,20 +119,59 @@ void selectCommand(){
 				int return_code = deleteRecord(luck_db_ptr, deleteKey);
 				finishTime = clock();
 
-				if(return_code != 0){
-					cout << "index" << *deleteKey << "该数据不存在， time" << 
+				if(return_code == 0){
+					cout << "executed delete删除成功, index:" << *deleteKey << "time :" << 
 					durationTime(&finishTime, &startTime) << nextLineHeader;
+				}else if(return_code == -1){
+					cout << "falied 删除失败, no index:" << deleteKey << "\n" << nextLineHeader;
 				}else{
-					printTable(deleteKey, );
+					cout << "error\n" << nextLineHeader;
 				}
-
 			}
-
 
 		}else if(strncmp(userCommand, "usdate", 6) == 0){
 			//更新数据
+			int *updateIndex = new int;
+			value_t *updateData = new value_t;
+
+			int okNum = sscanf(userCommand, "update db %s %d %s where id = %d",
+								updateData->name, &(updateData->age), updateData->email); 
+			
+			if(okNum < 3){	//数据不够，
+				cout << ErrorMessage << nextLineHeader;
+			}else{
+				startTime = clock();
+
+				int return_code = updateRecord(luck_db_ptr, updateIndex, updateData);
+
+				finishTime = clock();
+				
+				if(return_code == 0){
+					cout << "excuted update index:" << updateIndex << "time:"<<
+					durationTime(&finishTime, &startTime) <<"seconds"<< nextLineHeader;
+				}else{
+					cout << "can not update, no index:" << updateIndex << "time:"<<
+					durationTime(&finishTime, &startTime) <<"seconds"<< nextLineHeader;
+				}
+			}
 		}else if(strncmp(userCommand, "select", 6) == 0){
 			//查找数据
+			if(strstr(userCommand, "=") != nullptr){	//strstr 返回第二个字符串在第一个字符串的指针，或nullptr
+				int i_start = 0, i_end = 0;		//初始化查询id的起始范围
+
+				int okNum = sscanf(userCommand, "select * from db where id in (%d, %d)",
+									i_start, i_end);
+				
+				if(okNum < 2){	//查询id不够
+					cout << ErrorMessage <<nextLineHeader;
+				}else{
+					startTime = clock();
+
+					selectAll(luck_db_ptr, &i_start, &i_end);
+
+					finishTime = clock();
+				}
+			}
 		}else{
 			cout << ErrorMessage << endl;
 		}
@@ -159,6 +199,35 @@ int deleteRecord(bplus_tree *treePtr, int *index){
 	bpt::key_t key;
 	intToKeyT(&key, index);
 	return (*treePtr).remove(key);
+}
+
+int updateRecord(bplus_tree *treePtr, int * index, value_t * value){
+	bpt::key_t key;
+	intToKeyT(&key, index);
+	return (*treePtr).update(key, *value);
+}
+
+//select all
+void selectAll(bplus_tree * treePtr, int * i_start, int * i_end){
+	
+	TextTable t('-', '|', '+');
+
+	t.add("id");
+	t.add("name");
+	t.add("age");
+	t.add("email");
+	t.endOfRow();
+
+	bpt::key_t key;
+	value_t *return_val = new value_t;
+
+	for(int i = *i_start; i < *i_end; i++){
+
+		intToKeyT(&key, &i);
+
+		int retyrn_code = (*treePtr).search(key, return_val);
+	}
+
 }
 
 void intToKeyT(bpt::key_t * a, int *b){

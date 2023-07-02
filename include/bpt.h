@@ -32,6 +32,8 @@ class bplus_tree{
         int insert(const key_t &key, value_t value);
         int remove(const key_t &key);
         int update(const key_t &key, value_t value);
+
+        int search(const key_t& key, value_t *value) const;
         meta_t get_meta() const{
             return meta;
     };
