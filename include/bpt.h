@@ -3,6 +3,9 @@
 
 
 #include<stdio.h>
+#include<stddef.h>
+#include<stdlib.h>
+#include<assert.h>
 
 #ifndef UNIT_TEST
 #include"predefined.h";
@@ -22,6 +25,25 @@ typedef struct{
     off_t root_offset; /* where is the root of internal nodes */
     off_t leaf_offset; /* where is the first leaf */
 }meta_t;
+
+//b+树的叶子节点结构
+struct leaf_node_t{
+    typedef record_t *child_t;
+
+    //off_t 偏移量，此处为叶子节点的结构特征，不知有何深意。
+    // 猜测是因为每段叶子节点的内存是连续的。加上偏移量，储存对应数据结构的地址。类似数组下标。
+    off_t parent;
+    off_t next;
+    off_t prev;
+    size_t n;   //叶子节点大小
+    record_t children[BP_OEDER];    //叶子节点
+};
+
+//最后记录的数据结构
+struct record_t{
+    key_t key;
+    value_t value;
+};
 
 //封装b+树，
 class bplus_tree{
@@ -46,6 +68,21 @@ class bplus_tree{
         char path[512];
         meta_t meta;
 
+        off_t search_leaf(off_t index, const key_t &key) const;
+        off_t search_leaf(const key_t &key) const{
+            return search_leaf(search_leaf(key), key);
+        }
+
+
+
+        template<class T>
+        int map(T *block, off_t offset) const{
+            return map(block, offset, sizeof(T));
+        }
+
+        int map(void *block, off_t offset, size_t size) const{
+            cout << "使用了map的重载函数，还没有自定义完成" << endl;
+        }
 };
 
 }

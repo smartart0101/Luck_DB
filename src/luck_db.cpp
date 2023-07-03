@@ -171,6 +171,32 @@ void selectCommand(){
 
 					finishTime = clock();
 				}
+			}else{
+
+				int *SelectKey = new int;
+				int okNum = sscanf(userCommand, "select * from db shere id = %d", SelectKey);
+
+				if(okNum < 1){
+					cout<< "can not find key:" << nextLineHeader;
+				}else{
+
+					value_t *return_val = new value_t;
+
+					startTime = clock();
+
+					int return_code = searchRecord(luck_db_ptr, SelectKey, return_val);
+
+					finishTime = clock();
+
+					if (return_code != 0){
+						cout << "> index:"<< *SelectKey << " doesn't exist, time : "<< durationTime(&finishTime,&startTime) <<" seconds\n"<< nextLineHeader;
+					}else{
+						printTable( SelectKey , return_val);
+						cout << "> executed search, time : "<< durationTime(&finishTime,&startTime) <<" seconds\n"<< nextLineHeader;
+						
+					}
+				}
+
 			}
 		}else{
 			cout << ErrorMessage << endl;
@@ -225,9 +251,32 @@ void selectAll(bplus_tree * treePtr, int * i_start, int * i_end){
 
 		intToKeyT(&key, &i);
 
-		int retyrn_code = (*treePtr).search(key, return_val);
+		int return_code = (*treePtr).search(key, return_val);
+
+		switch(return_code){
+			case -1:
+				//不存在，
+				break;
+			case 0:
+				//找到了
+				t.add(to_string(i));
+				t.add(return_val->name);
+				t.add(to_string(return_val->age));
+				t.add(return_val->email);
+				t.endOfRow();
+				break;
+			case 1:
+				//已经被删除了
+				break;
+		}
 	}
 
+}
+
+int searchRecord(bplus_tree *treeptr, int *index, value_t *return_val){
+	bpt::key_t key;
+	intToKeyT(&key, index);
+	return (*treeptr).search(key, return_val);
 }
 
 void intToKeyT(bpt::key_t * a, int *b){

@@ -9,6 +9,9 @@
 //自定义一个命名空间，在其他而文件使用时，直接声明using 即可
 namespace bpt {
 
+//自定义一个 b+树 order 层数
+#define BP_OEDER 50
+
 //数据的结构体，插入，更改等公用
 struct value_t{
 	char name[256];
@@ -26,6 +29,12 @@ struct key_t{
 		strcpy(k, str);		//str内容复制到 k
 	}
 };
+
+inline int keycmp(const key_t &a, const key_t &b){
+	int x = strlen(a.k) - strlen(b.k);
+	//strcmp 比较两个字符串长度大小
+	return x == 0 ? strcmp(a.k, b.k) : x;
+}
 	
 }
 
