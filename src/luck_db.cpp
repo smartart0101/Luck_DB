@@ -217,7 +217,7 @@ int insertRecord(bplus_tree *treePtr, int *index, value_t *values){
 	bpt :: key_t key;
 	//把数字传给索引key
 	intToKeyT(&key, index);
-	//insrt 函数，想一个容器中插入元素，容器.insert(位置, 数据);
+	//insrt 函数(bpt.cpp里面定义)，想一个容器中插入元素，容器.insert(位置, 数据);
 	return (*treePtr).insert(key, *values);
 }
 

@@ -9,8 +9,8 @@
 //自定义一个命名空间，在其他而文件使用时，直接声明using 即可
 namespace bpt {
 
-//自定义一个 b+树 order 层数
-#define BP_OEDER 50
+//自定义一个 b+树 order 阶数
+#define BP_ORDER 50
 
 //数据的结构体，插入，更改等公用
 struct value_t{
