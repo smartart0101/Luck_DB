@@ -100,10 +100,16 @@ class bplus_tree{
         //initial empty tree
         void init_from_enmty();
 
+        off_t search_index(const key_t &key) const;
+
         off_t search_leaf(off_t index, const key_t &key) const;
         off_t search_leaf(const key_t &key) const{
             return search_leaf(search_leaf(key), key);
         }
+        //brrow one key from other internal node
+        bool borrow_key(bool from_right, internal_node_t &borrower, off_t offset);
+        //brrow one record from other leaf
+        bool borrow_key(bool from_right, leaf_node_t &borrower);
 
 
 
@@ -129,7 +135,7 @@ class bplus_tree{
             return unmap(block, offset, sizeof(T));
         }
 
-        int map(void *block, off_t offset, size_t size) const{
+        int unmap(void *block, off_t offset, size_t size) const{
             open_file();
             fseek(fd, offset, SEEK_SET);
             size_t wd = fwrite(block, size, 1, fd);
